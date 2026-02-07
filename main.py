@@ -26,8 +26,8 @@ class ValentineAI:
         self.clock = pygame.time.Clock()
         self.fps = 60
         
-        # Composants
-        self.brain = ValentineBrain(use_openai=False)  # Change en True si clé API
+        # Composants - Utilise le constructeur par défaut qui priorise OpenRouter
+        self.brain = ValentineBrain()
         self.audio_input = AudioInput()
         self.audio_output = AudioOutput()
         self.avatar = ValentineAvatar(self.screen)
@@ -40,8 +40,13 @@ class ValentineAI:
         self.last_activity = datetime.now()
         
         # Police pour le texte
-        self.font = pygame.font.SysFont("Arial", 20)
-        self.small_font = pygame.font.SysFont("Arial", 16)
+        try:
+            self.font = pygame.font.SysFont("Arial", 20)
+            self.small_font = pygame.font.SysFont("Arial", 16)
+        except:
+            # Fallback si Arial n'est pas disponible
+            self.font = pygame.font.Font(None, 24)
+            self.small_font = pygame.font.Font(None, 18)
         
         # Configuration des callbacks
         self.audio_output.volume_callback = self._on_volume_update
@@ -83,6 +88,7 @@ class ValentineAI:
         """Traite l'entrée utilisateur et génère une réponse"""
         # Génère la réponse
         response = self.brain.process_input(text)
+        print(f"Valentine: {response}")
         self.ai_response_text = response
         
         # Parle la réponse
@@ -113,6 +119,12 @@ class ValentineAI:
                 elif event.key == pygame.K_SPACE:
                     # Simulation de parole pour tests
                     self._on_user_speech("Je me sens seul aujourd'hui")
+                elif event.key == pygame.K_t:
+                    # Test direct de la synthèse vocale
+                    test_text = "Bonjour, je suis Valentine. Je suis là pour toi."
+                    self.ai_response_text = test_text
+                    self.audio_output.speak(test_text, self._on_speech_end)
+                    self.current_state = "speaking"
             
             elif event.type == pygame.VIDEORESIZE:
                 # Redimensionnement de la fenêtre
@@ -141,7 +153,7 @@ class ValentineAI:
         
         # Dernière entrée utilisateur
         if self.user_input_text:
-            user_text = f"Vous: {self.user_input_text[:50]}..."
+            user_text = f"Vous: {self.user_input_text[:50]}..." if len(self.user_input_text) > 50 else f"Vous: {self.user_input_text}"
             user_surface = self.small_font.render(user_text, True, pygame.Color("#666666"))
             self.screen.blit(user_surface, (20, Config.WINDOW_HEIGHT - 60))
         
@@ -172,7 +184,7 @@ class ValentineAI:
                 self.screen.blit(ai_surface, (20, Config.WINDOW_HEIGHT - 90 + i * 25))
         
         # Instructions
-        instr = "ESC: Quitter | ESPACE: Simulation (pour tests)"
+        instr = "ESC: Quitter | ESPACE: Simulation | T: Test voix"
         instr_surface = self.small_font.render(instr, True, pygame.Color("#999999"))
         self.screen.blit(instr_surface, (Config.WINDOW_WIDTH - instr_surface.get_width() - 20, 20))
         

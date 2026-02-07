@@ -1,14 +1,20 @@
-# brain.py
+# brain.py - Version corrigée pour OpenRouter
 import random
+import requests
 import json
 from datetime import datetime
 from config import Config
 
 class ValentineBrain:
-    def __init__(self, use_openai=False):
-        self.use_openai = use_openai
+    def __init__(self):
+        # Vérifie la configuration OpenRouter
+        self.use_openrouter = bool(Config.OPENROUTER_API_KEY.strip())
         self.conversation_history = []
         self._init_responses_db()
+        
+        print(f"🧠 Configuration Brain:")
+        print(f"   • OpenRouter activé: {self.use_openrouter}")
+        print(f"   • Modèle: {Config.OPENROUTER_MODEL}")
         
         # Salutations basées sur l'heure
         self.greetings = [
@@ -58,21 +64,23 @@ class ValentineBrain:
         if not user_input or len(user_input.strip()) < 2:
             return "Je t'écoute... Parle-moi de ce que tu ressens."
         
-        # Ajoute à l'historique
-        self.conversation_history.append(f"Utilisateur: {user_input}")
+        print(f"🧠 Utilisateur dit: '{user_input}'")
         
-        # Limite l'historique
-        if len(self.conversation_history) > 10:
-            self.conversation_history = self.conversation_history[-10:]
-        
-        # Essaie OpenAI d'abord si configuré
-        if self.use_openai:
+        # Essaie OpenRouter d'abord si configuré
+        if self.use_openrouter:
             try:
-                return self._get_openai_response(user_input)
-            except Exception:
-                pass  # Fallback sur les réponses locales
+                print("🔄 Tentative de réponse via OpenRouter...")
+                response = self._get_openrouter_response(user_input)
+                if response and len(response.strip()) > 10:
+                    print(f"✅ Réponse OpenRouter: '{response}'")
+                    return response
+                else:
+                    print("⚠️  Réponse OpenRouter trop courte, fallback local")
+            except Exception as e:
+                print(f"❌ Erreur OpenRouter: {e}")
         
-        # Réponse locale basée sur les mots-clés
+        # Fallback sur les réponses locales
+        print("🔄 Utilisation des réponses locales...")
         return self._get_local_response(user_input)
     
     def _get_local_response(self, text):
@@ -108,27 +116,73 @@ class ValentineBrain:
             categories = list(self.local_responses.keys())
             category = random.choice(categories)
         
-        return random.choice(self.local_responses[category])
+        response = random.choice(self.local_responses[category])
+        print(f"📦 Réponse locale: '{response}'")
+        return response
     
-    def _get_openai_response(self, user_input):
-        """Utilise l'API OpenAI pour générer une réponse"""
+    def _get_openrouter_response(self, user_input):
+        """Utilise l'API OpenRouter pour générer une réponse"""
         try:
-            from openai import OpenAI
-            client = OpenAI(api_key=Config.OPENAI_API_KEY)
+            headers = {
+                "Authorization": f"Bearer {Config.OPENROUTER_API_KEY}",
+                "HTTP-Referer": Config.OPENROUTER_SITE_URL or "http://localhost",
+                "X-Title": Config.OPENROUTER_SITE_NAME or "ValentineAI",
+                "Content-Type": "application/json"
+            }
             
-            messages = [
-                {"role": "system", "content": Config.SYSTEM_PROMPT},
-                {"role": "user", "content": user_input}
-            ]
+            data = {
+                "model": Config.OPENROUTER_MODEL,
+                "messages": [
+                    {"role": "system", "content": Config.SYSTEM_PROMPT},
+                    {"role": "user", "content": user_input}
+                ],
+                "max_tokens": 150,
+                "temperature": 0.7,
+                "top_p": 0.9,
+                "frequency_penalty": 0.3,
+                "presence_penalty": 0.3
+            }
             
-            response = client.chat.completions.create(
-                model=Config.OPENAI_MODEL,
-                messages=messages,
-                max_tokens=100,
-                temperature=0.7
+            print(f"🌐 Envoi requête à OpenRouter...")
+            response = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers=headers,
+                json=data,
+                timeout=15  # Timeout plus long
             )
             
-            return response.choices[0].message.content.strip()
+            print(f"📡 Statut HTTP: {response.status_code}")
             
-        except ImportError:
-            return self._get_local_response(user_input)
+            if response.status_code == 200:
+                result = response.json()
+                print(f"📦 Réponse brute: {result}")
+                
+                if "choices" in result and len(result["choices"]) > 0:
+                    content = result["choices"][0]["message"]["content"].strip()
+                    
+                    # Nettoyage de la réponse
+                    # Retire les réflexions internes comme "Alright, the user..."
+                    if "Alright," in content or "The user" in content or "I should" in content:
+                        # C'est une réflexion, on prend la partie après la dernière réflexion
+                        lines = content.split('\n')
+                        for line in reversed(lines):
+                            if line.strip() and not line.startswith(("Alright", "The user", "I should", "Since")):
+                                content = line.strip()
+                                break
+                    
+                    return content
+                else:
+                    raise Exception("Pas de réponse dans les choix")
+            else:
+                error_msg = f"Erreur HTTP {response.status_code}"
+                if response.text:
+                    error_msg += f": {response.text}"
+                raise Exception(error_msg)
+                
+        except requests.exceptions.Timeout:
+            raise Exception("Timeout: OpenRouter ne répond pas")
+        except requests.exceptions.ConnectionError:
+            raise Exception("Erreur de connexion")
+        except Exception as e:
+            print(f"❌ Erreur détaillée OpenRouter: {e}")
+            raise
