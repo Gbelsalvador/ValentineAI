@@ -273,15 +273,15 @@ ValentineAI est conçu comme un **outil de réconfort temporaire**, pas comme un
 - [FAQ](docs/FAQ.md)
 
 ### Communauté
-- [Discussions GitHub](https://github.com/votre-username/ValentineAI/discussions)
-- [Signalement de bugs](https://github.com/votre-username/ValentineAI/issues)
+- [Discussions GitHub](https://github.com/gbelsalvador/ValentineAI/discussions)
+- [Signalement de bugs](https://github.com/gbelsalvador/ValentineAI/issues)
 
 ### Contact
 Pour les questions techniques :  
-📧 technique@valentineai.example.com
+📧 gbelsalvador6gmail.com
 
 Pour les questions éthiques :  
-📧 ethique@valentineai.example.com
+📧 gbelsalvador6gmail.comS
 
 ---
 
