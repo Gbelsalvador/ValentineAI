@@ -1,4 +1,4 @@
-# audio_output.py - Version simplifiée pour Windows
+# audio_output.py - Version simplifiée pour Windows pour eviter les erreurs de lecture binaires pardon
 import pyttsx3
 import pygame
 import numpy as np
@@ -21,7 +21,7 @@ class AudioOutput:
         try:
             engine = pyttsx3.init()
             
-            # Configure une voix douce
+            # Configuration de la voix 
             voices = engine.getProperty('voices')
             print(f"Voix disponibles: {[v.name for v in voices]}")
             
@@ -29,7 +29,7 @@ class AudioOutput:
             
             if french_voices:
                 engine.setProperty('voice', french_voices[0].id)
-                print(f"✅ Voix française sélectionnée: {french_voices[0].name}")
+                print(f"Voix française sélectionnée: {french_voices[0].name}")
             else:
                 # Essaye de trouver une voix féminine
                 female_voices = [v for v in voices if 'female' in v.name.lower() 
@@ -37,11 +37,11 @@ class AudioOutput:
                                or 'hazel' in v.name.lower()]
                 if female_voices:
                     engine.setProperty('voice', female_voices[0].id)
-                    print(f"✅ Voix féminine sélectionnée: {female_voices[0].name}")
+                    print(f"Voix féminine sélectionnée: {female_voices[0].name}")
                 else:
-                    print(f"⚠️  Utilisation de la voix par défaut: {voices[0].name}")
+                    print(f"Utilisation de la voix par défaut: {voices[0].name}")
             
-            # Paramètres doux
+            # Paramètres 
             engine.setProperty('rate', 160)  # Vitesse moyenne
             engine.setProperty('volume', 0.9)  # Volume
             
@@ -51,7 +51,7 @@ class AudioOutput:
             
             return engine
         except Exception as e:
-            print(f"❌ Erreur initialisation TTS: {e}")
+            print(f"Erreur initialisation TTS: {e}")
             return None
     
     def _on_speech_start(self, name, location, length):
@@ -65,30 +65,30 @@ class AudioOutput:
     def speak(self, text, callback=None):
         """Convertit le texte en parole et joue l'audio"""
         if self.is_speaking or not self.engine:
-            print(f"⚠️  Déjà en train de parler ou moteur TTS non initialisé")
+            print(f"Déjà en train de parler ou moteur TTS non initialisé")
             return
         
-        print(f"🎤 Début de la synthèse vocale: '{text[:50]}...'")
+        print(f"Début de la synthèse vocale: '{text[:50]}...'")
         self.is_speaking = True
         
         def speak_thread():
             try:
-                # Génère des données de volume factices pour l'animation
+                # Génèration des données de volume factices pour l'animation
                 fake_volume_data = self._generate_volume_data(text)
                 
-                # Envoie les données de volume pour l'animation
+                
                 if self.volume_callback:
-                    print(f"📊 Envoi des données d'animation: {len(fake_volume_data)} points")
+                    print(f"Envoi des données d'animation: {len(fake_volume_data)} points")
                     self.volume_callback(fake_volume_data)
                 
                 # Parle le texte
                 self.engine.say(text)
                 self.engine.runAndWait()
                 
-                print(f"✅ Synthèse vocale terminée")
+                print(f"Synthèse vocale terminée")
                 
             except Exception as e:
-                print(f"❌ Erreur synthèse vocale: {e}")
+                print(f"Erreur synthèse vocale: {e}")
             finally:
                 self.is_speaking = False
                 if callback:

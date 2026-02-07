@@ -36,11 +36,11 @@ class ValentineAvatar:
         self.face_center = (self.width // 2, self.height // 2)
         self.face_radius = min(self.width, self.height) // 3
         
-        # Démarrer le clignotement
+        # Démarrage de clignotement
         self._start_blinking()
     
     def _start_blinking(self):
-        """Démarre le thread de clignotement automatique"""
+        """Démarrage de thread de clignotement automatique"""
         def blink_thread():
             while True:
                 current_time = pygame.time.get_ticks()
@@ -53,7 +53,7 @@ class ValentineAvatar:
                         Config.BLINK_INTERVAL_MAX
                     )
                 
-                time.sleep(0.05)  # Vérifie toutes les 50ms
+                time.sleep(0.05)  
         
         threading.Thread(target=blink_thread, daemon=True).start()
     
@@ -91,8 +91,8 @@ class ValentineAvatar:
         self.mouth_openness += (self.target_mouth_openness - self.mouth_openness) * Config.MOUTH_SMOOTHING
     
     def draw(self):
-        """Dessine le visage complet"""
-        # Fond doux
+        """fonction pour dessiner les vsages"""
+
         self.screen.fill(pygame.Color(Config.BG_COLOR))
         
         # Visage
@@ -133,7 +133,7 @@ class ValentineAvatar:
             self.face_center[1] + eye_y_offset
         )
         
-        # Dessine les yeux comme des ellipses
+        # les yeux comme des ellipses
         pygame.draw.ellipse(
             self.screen,
             self.eye_color,
@@ -172,7 +172,7 @@ class ValentineAvatar:
         )
     
     def _draw_mouth(self):
-        """Dessine la bouche avec animation"""
+        """ la bouche avec animation"""
         mouth_width = self.face_radius // 1.5
         mouth_height = self.face_radius // 4 * self.mouth_openness
         
@@ -183,7 +183,7 @@ class ValentineAvatar:
             mouth_height
         )
         
-        # Dessine un sourire doux
+        # Dessiner un sourire doux
         pygame.draw.ellipse(self.screen, self.mouth_color, mouth_rect)
     
     def _draw_eyebrows(self):

@@ -1,4 +1,4 @@
-# brain.py - Version corrigée pour OpenRouter
+# brain.py - Version corrigée pour  s'adpater avec OpenRouter 
 import random
 import requests
 import json
@@ -72,15 +72,15 @@ class ValentineBrain:
                 print("🔄 Tentative de réponse via OpenRouter...")
                 response = self._get_openrouter_response(user_input)
                 if response and len(response.strip()) > 10:
-                    print(f"✅ Réponse OpenRouter: '{response}'")
+                    print(f"Réponse OpenRouter: '{response}'")
                     return response
                 else:
-                    print("⚠️  Réponse OpenRouter trop courte, fallback local")
+                    print("Réponse OpenRouter trop courte, fallback local")
             except Exception as e:
-                print(f"❌ Erreur OpenRouter: {e}")
+                print(f"Erreur OpenRouter: {e}")
         
         # Fallback sur les réponses locales
-        print("🔄 Utilisation des réponses locales...")
+        print("Utilisation des réponses locales...")
         return self._get_local_response(user_input)
     
     def _get_local_response(self, text):

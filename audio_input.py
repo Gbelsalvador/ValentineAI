@@ -59,7 +59,7 @@ class AudioInput:
         self.audio_queue = queue.Queue()
         self.is_listening = False
         
-        # Ajuste le bruit ambiant
+        # Ajustation le bruit ambiant
         with self.microphone as source:
             self.recognizer.adjust_for_ambient_noise(source, duration=1)
     
@@ -99,7 +99,7 @@ class AudioInput:
             if text and len(text.strip()) > 1:
                 self.callback(text.strip())
         except sr.UnknownValueError:
-            pass  # Silence ou parole incompréhensible
+            pass  # Silence et parole incompréhensible
         except sr.RequestError as e:
             print(f"Erreur API reconnaissance: {e}")
         except Exception as e:
