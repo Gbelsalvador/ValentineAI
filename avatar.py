@@ -34,6 +34,8 @@ class ValentineAvatar:
         self.eye_color = pygame.Color("#4A2636")
         self.skin_shadow = pygame.Color("#F0B9C5")
         self.blush_color = pygame.Color("#F49CAF")
+        self.outfit_color = pygame.Color("#B94E72")
+        self.outfit_shadow = pygame.Color("#8E3557")
         self.mouth_color = pygame.Color("#B84D70")
         self.lip_highlight = pygame.Color("#E989A3")
         
@@ -104,36 +106,50 @@ class ValentineAvatar:
 
         self.screen.fill(pygame.Color(Config.BG_COLOR))
         
-        # Silhouette : cheveux, cou et épaules derrière le visage.
-        shoulder_y = self.face_center[1] + self.face_radius + self.face_radius // 2
-        pygame.draw.ellipse(
+        # Silhouette : cheveux, cou, épaules et buste derrière le visage.
+        shoulder_y = self.face_center[1] + self.face_radius + self.face_radius // 3
+        torso_top = shoulder_y - self.face_radius // 5
+        torso_bottom = self.height + self.face_radius
+        center_x = self.face_center[0]
+        pygame.draw.polygon(
             self.screen,
-            self.hair_color,
-            (
-                self.face_center[0] - self.face_radius - self.face_radius // 6,
-                self.face_center[1] - self.face_radius - self.face_radius // 5,
-                self.face_radius * 2 + self.face_radius // 3,
-                self.face_radius * 2 + self.face_radius // 2,
-            ),
+            self.outfit_color,
+            [
+                (center_x - self.face_radius * 3 // 2, torso_top),
+                (center_x - self.face_radius // 2, torso_top - self.face_radius // 8),
+                (center_x - self.face_radius // 3, torso_top + self.face_radius // 4),
+                (center_x + self.face_radius // 3, torso_top + self.face_radius // 4),
+                (center_x + self.face_radius // 2, torso_top - self.face_radius // 8),
+                (center_x + self.face_radius * 3 // 2, torso_top),
+                (center_x + self.face_radius * 2, torso_bottom),
+                (center_x - self.face_radius * 2, torso_bottom),
+            ],
+        )
+        pygame.draw.line(
+            self.screen,
+            self.outfit_shadow,
+            (center_x, torso_top + self.face_radius // 5),
+            (center_x, torso_bottom),
+            max(2, self.face_radius // 25),
         )
         pygame.draw.ellipse(
             self.screen,
             self.skin_shadow,
             (
-                self.face_center[0] - self.face_radius // 3,
-                shoulder_y - self.face_radius // 5,
+                center_x - self.face_radius // 3,
+                shoulder_y - self.face_radius // 2,
                 self.face_radius * 2 // 3,
-                self.face_radius,
+                self.face_radius * 5 // 4,
             ),
         )
         pygame.draw.ellipse(
             self.screen,
-            pygame.Color("#D96C8A"),
+            self.outfit_shadow,
             (
-                self.face_center[0] - self.face_radius * 2,
-                shoulder_y - self.face_radius // 5,
-                self.face_radius * 4,
-                self.face_radius * 2,
+                center_x - self.face_radius * 3 // 2,
+                torso_top - self.face_radius // 5,
+                self.face_radius * 3,
+                self.face_radius,
             ),
         )
 
@@ -171,6 +187,14 @@ class ValentineAvatar:
             (self.face_center[0] - self.face_radius * 2 // 3, self.face_center[1] + self.face_radius // 5),
             max(2, self.face_radius // 12),
         )
+        earring_y = self.face_center[1] + self.face_radius // 3
+        for earring_x in (self.face_center[0] - self.face_radius, self.face_center[0] + self.face_radius):
+            pygame.draw.circle(
+                self.screen,
+                pygame.Color("#F7C96B"),
+                (earring_x, earring_y),
+                max(2, self.face_radius // 24),
+            )
         pygame.draw.circle(
             self.screen,
             self.blush_color,
@@ -206,6 +230,20 @@ class ValentineAvatar:
                     self.face_radius * 3 // 2,
                 ),
             )
+
+        # Frange souple qui donne une forme plus expressive au visage.
+        pygame.draw.polygon(
+            self.screen,
+            self.hair_color,
+            [
+                (self.face_center[0] - self.face_radius, self.face_center[1] - self.face_radius // 2),
+                (self.face_center[0] - self.face_radius * 3 // 5, self.face_center[1] - self.face_radius),
+                (self.face_center[0] - self.face_radius // 6, self.face_center[1] - self.face_radius * 3 // 5),
+                (self.face_center[0] + self.face_radius // 8, self.face_center[1] - self.face_radius),
+                (self.face_center[0] + self.face_radius * 3 // 5, self.face_center[1] - self.face_radius * 4 // 5),
+                (self.face_center[0] + self.face_radius, self.face_center[1] - self.face_radius // 2),
+            ],
+        )
     
     def _draw_eyes(self):
         """Dessine les yeux avec animation de clignotement"""
