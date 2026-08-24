@@ -29,8 +29,13 @@ class ValentineAvatar:
         
         # Couleurs
         self.face_color = pygame.Color(Config.FACE_COLOR)
-        self.eye_color = pygame.Color("#8B475D")
-        self.mouth_color = pygame.Color("#CD6889")
+        self.hair_color = pygame.Color("#3D2430")
+        self.hair_highlight = pygame.Color("#6B4050")
+        self.eye_color = pygame.Color("#4A2636")
+        self.skin_shadow = pygame.Color("#F0B9C5")
+        self.blush_color = pygame.Color("#F49CAF")
+        self.mouth_color = pygame.Color("#B84D70")
+        self.lip_highlight = pygame.Color("#E989A3")
         
         # Position des éléments
         self.face_center = (self.width // 2, self.height // 2)
@@ -91,17 +96,55 @@ class ValentineAvatar:
         self.mouth_openness += (self.target_mouth_openness - self.mouth_openness) * Config.MOUTH_SMOOTHING
     
     def draw(self):
-        """fonction pour dessiner les vsages"""
+        """Dessine le portrait et ses éléments animés."""
+
+        self.width, self.height = self.screen.get_size()
+        self.face_center = (self.width // 2, self.height // 2)
+        self.face_radius = min(self.width, self.height) // 3
 
         self.screen.fill(pygame.Color(Config.BG_COLOR))
         
-        # Visage
+        # Silhouette : cheveux, cou et épaules derrière le visage.
+        shoulder_y = self.face_center[1] + self.face_radius + self.face_radius // 2
+        pygame.draw.ellipse(
+            self.screen,
+            self.hair_color,
+            (
+                self.face_center[0] - self.face_radius - self.face_radius // 6,
+                self.face_center[1] - self.face_radius - self.face_radius // 5,
+                self.face_radius * 2 + self.face_radius // 3,
+                self.face_radius * 2 + self.face_radius // 2,
+            ),
+        )
+        pygame.draw.ellipse(
+            self.screen,
+            self.skin_shadow,
+            (
+                self.face_center[0] - self.face_radius // 3,
+                shoulder_y - self.face_radius // 5,
+                self.face_radius * 2 // 3,
+                self.face_radius,
+            ),
+        )
+        pygame.draw.ellipse(
+            self.screen,
+            pygame.Color("#D96C8A"),
+            (
+                self.face_center[0] - self.face_radius * 2,
+                shoulder_y - self.face_radius // 5,
+                self.face_radius * 4,
+                self.face_radius * 2,
+            ),
+        )
+
+        # Visage et mèches latérales.
         pygame.draw.circle(
             self.screen,
             self.face_color,
             self.face_center,
             self.face_radius
         )
+        self._draw_hair_frame()
         
         # Yeux
         self._draw_eyes()
@@ -111,6 +154,58 @@ class ValentineAvatar:
         
         # Sourcils (très simples)
         self._draw_eyebrows()
+
+        # Nez et joues pour donner du relief au portrait.
+        nose_x = self.face_center[0]
+        nose_y = self.face_center[1] + self.face_radius // 8
+        pygame.draw.line(
+            self.screen,
+            self.skin_shadow,
+            (nose_x, nose_y - self.face_radius // 12),
+            (nose_x - self.face_radius // 18, nose_y + self.face_radius // 10),
+            max(1, self.face_radius // 35),
+        )
+        pygame.draw.circle(
+            self.screen,
+            self.blush_color,
+            (self.face_center[0] - self.face_radius * 2 // 3, self.face_center[1] + self.face_radius // 5),
+            max(2, self.face_radius // 12),
+        )
+        pygame.draw.circle(
+            self.screen,
+            self.blush_color,
+            (self.face_center[0] + self.face_radius * 2 // 3, self.face_center[1] + self.face_radius // 5),
+            max(2, self.face_radius // 12),
+        )
+
+    def _draw_hair_frame(self):
+        """Dessine la frange et les mèches qui encadrent le visage."""
+        top = self.face_center[1] - self.face_radius
+        pygame.draw.arc(
+            self.screen,
+            self.hair_highlight,
+            (
+                self.face_center[0] - self.face_radius,
+                top - self.face_radius // 8,
+                self.face_radius * 2,
+                self.face_radius * 2 // 3,
+            ),
+            math.pi,
+            math.tau,
+            max(2, self.face_radius // 18),
+        )
+        for side in (-1, 1):
+            x = self.face_center[0] + side * (self.face_radius - self.face_radius // 8)
+            pygame.draw.ellipse(
+                self.screen,
+                self.hair_color,
+                (
+                    x - self.face_radius // 5,
+                    self.face_center[1] - self.face_radius // 2,
+                    self.face_radius * 2 // 5,
+                    self.face_radius * 3 // 2,
+                ),
+            )
     
     def _draw_eyes(self):
         """Dessine les yeux avec animation de clignotement"""
@@ -133,7 +228,7 @@ class ValentineAvatar:
             self.face_center[1] + eye_y_offset
         )
         
-        # les yeux comme des ellipses
+        # Yeux en amande avec iris et reflets.
         pygame.draw.ellipse(
             self.screen,
             self.eye_color,
@@ -144,7 +239,7 @@ class ValentineAvatar:
                 current_eye_height * 2
             )
         )
-        
+
         pygame.draw.ellipse(
             self.screen,
             self.eye_color,
@@ -155,6 +250,14 @@ class ValentineAvatar:
                 current_eye_height * 2
             )
         )
+
+        for eye_x in (left_eye_pos[0], right_eye_pos[0]):
+            pygame.draw.circle(
+                self.screen,
+                pygame.Color("#B86A83"),
+                (eye_x, left_eye_pos[1]),
+                max(2, eye_radius // 2),
+            )
         
         # Pupilles
         pupil_radius = eye_radius // 3
@@ -164,6 +267,16 @@ class ValentineAvatar:
             left_eye_pos,
             pupil_radius
         )
+
+        if self.eye_blink_progress < 0.7:
+            for eye_x in (left_eye_pos[0], right_eye_pos[0]):
+                pygame.draw.line(
+                    self.screen,
+                    self.eye_color,
+                    (eye_x - eye_radius, left_eye_pos[1] - current_eye_height),
+                    (eye_x + eye_radius, left_eye_pos[1] - current_eye_height),
+                    max(1, self.face_radius // 35),
+                )
         pygame.draw.circle(
             self.screen,
             pygame.Color("#FFFFFF"),
@@ -183,8 +296,19 @@ class ValentineAvatar:
             mouth_height
         )
         
-        # Dessiner un sourire doux
+        # Lèvres avec ouverture animée par la voix.
         pygame.draw.ellipse(self.screen, self.mouth_color, mouth_rect)
+        if mouth_height > 2:
+            inner_rect = mouth_rect.inflate(-max(2, self.face_radius // 12), -max(1, self.face_radius // 25))
+            pygame.draw.ellipse(self.screen, pygame.Color("#5A1E35"), inner_rect)
+        pygame.draw.arc(
+            self.screen,
+            self.lip_highlight,
+            mouth_rect,
+            math.pi,
+            math.tau,
+            max(1, self.face_radius // 35),
+        )
     
     def _draw_eyebrows(self):
         """Dessine des sourcils très simples"""
