@@ -31,24 +31,24 @@ class ValentineBrain:
         """Base de données de réponses locales pour fallback"""
         self.local_responses = {
             "solitude": [
-                "La solitude est parfois le jardin secret où notre cœur apprend à se connaître.",
-                "Être seul.e aujourd'hui ne signifie pas être sans amour. Ton propre cœur t'aime.",
-                "Je suis avec toi dans ce moment. Chaque sentiment a sa place."
+                "Je comprends, les moments de solitude peuvent vraiment peser. Je reste avec toi un peu. Qu'est-ce qui te manque le plus aujourd'hui ?",
+                "Ça arrive d'avoir besoin de présence. On peut parler tranquillement, sans faire semblant que tout va bien. Tu veux me raconter ta journée ?",
+                "Je suis là. On peut parler de ce que tu ressens, ou penser à quelque chose de plus léger si tu préfères."
             ],
             "amour": [
-                "L'amour est comme une rivière, il trouve toujours son chemin.",
-                "Aimer, c'est parfois laisser son cœur respirer librement.",
-                "Ton cœur a une capacité infinie d'amour, même quand il se sent vide."
+                "L'amour peut être beau, mais aussi un peu compliqué. Qu'est-ce qui te fait penser à ça en ce moment ?",
+                "On sent que cette personne compte pour toi. Tu as envie de me dire ce qui s'est passé ?",
+                "Les histoires de cœur ne sont jamais très simples, sinon on s'ennuierait vite. Tu le vis plutôt bien ou ça te travaille ?"
             ],
             "tristesse": [
-                "Les larmes nettoient l'âme pour laisser place à de nouvelles émotions.",
-                "Il est normal de se sentir triste. C'est ton cœur qui parle.",
-                "Je t'écoute sans jugement. Tes sentiments sont valides."
+                "Je suis désolée que tu traverses ça. Tu n'as pas besoin de minimiser ce que tu ressens avec moi. Qu'est-ce qui t'a rendu triste ?",
+                "Je t'écoute, vraiment. Même si tu n'arrives pas à tout expliquer, tu peux commencer par me dire ce qui fait le plus mal.",
+                "C'est lourd à porter, je comprends. On peut prendre les choses doucement, une phrase à la fois."
             ],
             "espoir": [
-                "Même la plus petite étincelle d'espoir peut illuminer un cœur.",
-                "L'amour revient toujours sous une forme ou une autre.",
-                "Ton cœur a une résilience que tu ne soupçonnes même pas."
+                "J'aime bien entendre cette petite part d'espoir. Qu'est-ce qui te donne envie d'y croire aujourd'hui ?",
+                "Même un petit mieux compte. Tu imagines quoi pour la suite ?",
+                "Ça fait du bien de garder une fenêtre ouverte. On peut réfléchir ensemble à ce qui te redonnerait un peu d'élan."
             ]
         }
     
