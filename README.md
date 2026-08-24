@@ -161,13 +161,13 @@ ValentineAI/
 #### 🧠 `brain.py`
 - **Moteur de réponse** émotionnelle
 - **Gestion de conversation** avec historique persistant
-- **Support OpenAI API** (optionnel)
+- **Support Groq avec GPT OSS** (optionnel)
 - **Fallback local** avec base de réponses pré-définies
 
 #### 💾 Mémoire de conversation
 L'historique est enregistré dans `conversation_memory.json` à côté de l'application.
-Il est limité aux 40 derniers messages et est envoyé à OpenRouter à chaque nouveau
-tour pour que Valentine puisse garder le fil de la discussion après un redémarrage.
+Il est limité aux 40 derniers messages et est envoyé à Groq à chaque nouveau tour
+pour que Valentine puisse garder le fil de la discussion après un redémarrage.
 Ce fichier reste local et ne doit pas être partagé s'il contient des informations privées.
 
 #### 🎤 `audio_input.py`
@@ -211,7 +211,8 @@ SYSTEM_PROMPT = """Tu es Valentine, une IA de compagnie émotionnelle..."""
 
 ```env
 # Fichier .env
-OPENAI_API_KEY=votre_clé_api_ici
+GROQ_API_KEY=votre_clé_groq_ici
+GROQ_MODEL=openai/gpt-oss-120b
 ```
 
 ---

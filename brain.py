@@ -1,4 +1,4 @@
-# brain.py - Version corrigée pour  s'adpater avec OpenRouter 
+# brain.py - Cerveau conversationnel avec Groq et GPT OSS
 import random
 import requests
 import json
@@ -8,8 +8,6 @@ from memory import ConversationMemory
 
 class ValentineBrain:
     def __init__(self, memory_path=None):
-        # Vérifie la configuration OpenRouter
-        self.use_openrouter = bool(Config.OPENROUTER_API_KEY.strip())
         self.memory = ConversationMemory(
             memory_path or Config.MEMORY_FILE,
             Config.MEMORY_MAX_MESSAGES,
@@ -18,8 +16,8 @@ class ValentineBrain:
         self._init_responses_db()
         
         print(f"🧠 Configuration Brain:")
-        print(f"   • OpenRouter activé: {self.use_openrouter}")
-        print(f"   • Modèle: {Config.OPENROUTER_MODEL}")
+        print(f"   • Groq configuré: {bool(Config.GROQ_API_KEY)}")
+        print(f"   • Modèle: {Config.GROQ_MODEL}")
         
         # Salutations basées sur l'heure
         self.greetings = [
@@ -75,19 +73,17 @@ class ValentineBrain:
         
         print(f"🧠 Utilisateur dit: '{user_input}'")
         
-        # Essaie OpenRouter d'abord si configuré
         response = None
-        if self.use_openrouter:
+        if Config.GROQ_API_KEY:
             try:
-                print("🔄 Tentative de réponse via OpenRouter...")
-                response = self._get_openrouter_response(user_input)
+                response = self._get_groq_response(user_input)
                 if response and len(response.strip()) > 10:
-                    print(f"Réponse OpenRouter: '{response}'")
+                    print(f"Réponse Groq: '{response}'")
                 else:
-                    print("Réponse OpenRouter trop courte, fallback local")
+                    print("Réponse Groq trop courte, fallback local")
                     response = None
             except Exception as e:
-                print(f"Erreur OpenRouter: {e}")
+                print(f"Erreur Groq: {e}")
         
         if response is None:
             print("Utilisation des réponses locales...")
@@ -147,18 +143,16 @@ class ValentineBrain:
         print(f"📦 Réponse locale: '{response}'")
         return response
     
-    def _get_openrouter_response(self, user_input):
-        """Utilise l'API OpenRouter pour générer une réponse"""
+    def _get_groq_response(self, user_input):
+        """Utilise le modèle GPT OSS via l'API Groq."""
         try:
             headers = {
-                "Authorization": f"Bearer {Config.OPENROUTER_API_KEY}",
-                "HTTP-Referer": Config.OPENROUTER_SITE_URL or "http://localhost",
-                "X-Title": Config.OPENROUTER_SITE_NAME or "ValentineAI",
+                "Authorization": f"Bearer {Config.GROQ_API_KEY}",
                 "Content-Type": "application/json"
             }
             
             data = {
-                "model": Config.OPENROUTER_MODEL,
+                "model": Config.GROQ_MODEL,
                 "messages": self._build_messages(user_input),
                 "max_tokens": 150,
                 "temperature": 0.7,
@@ -167,12 +161,12 @@ class ValentineBrain:
                 "presence_penalty": 0.3
             }
             
-            print(f"🌐 Envoi requête à OpenRouter...")
+            print("🌐 Envoi requête à Groq...")
             response = requests.post(
-                "https://openrouter.ai/api/v1/chat/completions",
+                "https://api.groq.com/openai/v1/chat/completions",
                 headers=headers,
                 json=data,
-                timeout=15  # Timeout plus long
+                timeout=15
             )
             
             print(f"📡 Statut HTTP: {response.status_code}")
@@ -204,9 +198,9 @@ class ValentineBrain:
                 raise Exception(error_msg)
                 
         except requests.exceptions.Timeout:
-            raise Exception("Timeout: OpenRouter ne répond pas")
+            raise Exception("Timeout: Groq ne répond pas")
         except requests.exceptions.ConnectionError:
             raise Exception("Erreur de connexion")
         except Exception as e:
-            print(f"❌ Erreur détaillée OpenRouter: {e}")
+            print(f"❌ Erreur détaillée Groq: {e}")
             raise

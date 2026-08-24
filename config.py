@@ -12,11 +12,9 @@ class Config:
     # Chemins
     BASE_DIR = Path(__file__).parent
     
-    # OpenRouter
-    OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "").strip()
-    OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "openrouter/free")
-    OPENROUTER_SITE_URL = os.getenv("OPENROUTER_SITE_URL", "http://localhost:8000")
-    OPENROUTER_SITE_NAME = os.getenv("OPENROUTER_SITE_NAME", "ValentineAI")
+    # Groq utilise une API compatible OpenAI.
+    GROQ_API_KEY = os.getenv("GROQ_API_KEY", "").strip()
+    GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b").strip()
 
     # Mémoire locale de conversation
     MEMORY_FILE = BASE_DIR / "conversation_memory.json"
