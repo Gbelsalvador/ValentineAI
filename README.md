@@ -12,7 +12,7 @@ ValentineAI est une application Python interactive conçue pour offrir réconfor
 - **Réponses contextuelles** adaptées aux émotions exprimées
 - **Base de connaissances locale** avec réponses pré-définies
 - **Prompt système spécialisé** en réconfort et soutien émotionnel
-- **Historique de conversation** pour des échanges cohérents
+- **Mémoire persistante locale** pour conserver le contexte entre les tours et les redémarrages
 
 ### 🎤 Interface Vocale Bidirectionnelle
 - **Reconnaissance vocale** via microphone
@@ -142,6 +142,7 @@ ValentineAI/
 ├── audio_input.py       # Capture audio et reconnaissance vocale
 ├── audio_output.py      # Synthèse vocale et animation labiale
 ├── brain.py             # Logique IA et gestion des réponses
+├── memory.py            # Persistance locale de l'historique
 ├── avatar.py            # Rendu et animation du visage
 │
 ├── requirements.txt     # Dépendances Python
@@ -159,9 +160,15 @@ ValentineAI/
 
 #### 🧠 `brain.py`
 - **Moteur de réponse** émotionnelle
-- **Gestion de conversation** avec historique
+- **Gestion de conversation** avec historique persistant
 - **Support OpenAI API** (optionnel)
 - **Fallback local** avec base de réponses pré-définies
+
+#### 💾 Mémoire de conversation
+L'historique est enregistré dans `conversation_memory.json` à côté de l'application.
+Il est limité aux 40 derniers messages et est envoyé à OpenRouter à chaque nouveau
+tour pour que Valentine puisse garder le fil de la discussion après un redémarrage.
+Ce fichier reste local et ne doit pas être partagé s'il contient des informations privées.
 
 #### 🎤 `audio_input.py`
 - **Capture microphone** avec PyAudio

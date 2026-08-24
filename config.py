@@ -17,6 +17,10 @@ class Config:
     OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "openrouter/free")
     OPENROUTER_SITE_URL = os.getenv("OPENROUTER_SITE_URL", "http://localhost:8000")
     OPENROUTER_SITE_NAME = os.getenv("OPENROUTER_SITE_NAME", "ValentineAI")
+
+    # Mémoire locale de conversation
+    MEMORY_FILE = BASE_DIR / "conversation_memory.json"
+    MEMORY_MAX_MESSAGES = 40
     
     # Paramètres audio
     SAMPLE_RATE = 16000

@@ -4,12 +4,17 @@ import requests
 import json
 from datetime import datetime
 from config import Config
+from memory import ConversationMemory
 
 class ValentineBrain:
-    def __init__(self):
+    def __init__(self, memory_path=None):
         # Vérifie la configuration OpenRouter
         self.use_openrouter = bool(Config.OPENROUTER_API_KEY.strip())
-        self.conversation_history = []
+        self.memory = ConversationMemory(
+            memory_path or Config.MEMORY_FILE,
+            Config.MEMORY_MAX_MESSAGES,
+        )
+        self.conversation_history = self.memory.messages
         self._init_responses_db()
         
         print(f"🧠 Configuration Brain:")
@@ -53,11 +58,15 @@ class ValentineBrain:
         """Retourne une salutation appropriée"""
         hour = datetime.now().hour
         if hour < 12:
-            return random.choice(self.greetings)
+            greeting = random.choice(self.greetings)
         elif hour < 18:
-            return "Bonjour, comment va ton cœur cet après-midi?"
+            greeting = "Bonjour, comment va ton cœur cet après-midi?"
         else:
-            return "Bonsoir, la nuit est souvent le moment où le cœur parle le plus. Je t'écoute."
+            greeting = "Bonsoir, la nuit est souvent le moment où le cœur parle le plus. Je t'écoute."
+
+        self.memory.add_assistant_message(greeting)
+        self.conversation_history = self.memory.messages
+        return greeting
     
     def process_input(self, user_input):
         """Traite l'entrée utilisateur et génère une réponse"""
@@ -67,21 +76,39 @@ class ValentineBrain:
         print(f"🧠 Utilisateur dit: '{user_input}'")
         
         # Essaie OpenRouter d'abord si configuré
+        response = None
         if self.use_openrouter:
             try:
                 print("🔄 Tentative de réponse via OpenRouter...")
                 response = self._get_openrouter_response(user_input)
                 if response and len(response.strip()) > 10:
                     print(f"Réponse OpenRouter: '{response}'")
-                    return response
                 else:
                     print("Réponse OpenRouter trop courte, fallback local")
+                    response = None
             except Exception as e:
                 print(f"Erreur OpenRouter: {e}")
         
-        # Fallback sur les réponses locales
-        print("Utilisation des réponses locales...")
-        return self._get_local_response(user_input)
+        if response is None:
+            print("Utilisation des réponses locales...")
+            response = self._get_local_response(user_input)
+
+        self.memory.add_exchange(user_input, response)
+        self.conversation_history = self.memory.messages
+        return response
+
+    def clear_memory(self):
+        """Efface l'historique local de conversation."""
+        self.memory.clear()
+        self.conversation_history = self.memory.messages
+
+    def _build_messages(self, user_input):
+        """Construit les messages dans l'ordre attendu par l'API."""
+        return [
+            {"role": "system", "content": Config.SYSTEM_PROMPT},
+            *self.memory.snapshot(),
+            {"role": "user", "content": user_input},
+        ]
     
     def _get_local_response(self, text):
         """Génère une réponse basée sur des mots-clés"""
@@ -132,10 +159,7 @@ class ValentineBrain:
             
             data = {
                 "model": Config.OPENROUTER_MODEL,
-                "messages": [
-                    {"role": "system", "content": Config.SYSTEM_PROMPT},
-                    {"role": "user", "content": user_input}
-                ],
+                "messages": self._build_messages(user_input),
                 "max_tokens": 150,
                 "temperature": 0.7,
                 "top_p": 0.9,
